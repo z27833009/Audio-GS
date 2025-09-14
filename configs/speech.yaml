@@ -1,0 +1,35 @@
+# Configuration optimized for speech compression
+
+# Model - fewer Gaussians sufficient for speech
+num_gaussians: 300
+init_method: peaks
+
+# Audio parameters - optimized for speech
+sample_rate: 16000
+n_fft: 512
+hop_length: 160
+win_length: 512
+
+# Optimization - faster convergence
+num_steps: 3000
+lr: 0.02
+lr_decay: 0.99
+optimizer_type: adam
+
+# Loss - focus on intelligibility
+loss_type: l2
+perceptual_weight: 0.5
+phase_weight: 0.1
+
+# Adaptive refinement
+adaptive_add: false
+add_gaussians_steps: []
+
+# Quantization - aggressive for low bitrate
+quantize: true
+bits_per_param: 6
+
+# Logging
+save_steps: 500
+eval_steps: 250
+log_level: INFO

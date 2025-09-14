@@ -1,0 +1,35 @@
+# Default configuration for Audio-GS
+
+# Model
+num_gaussians: 500
+init_method: peaks  # peaks, random, uniform
+
+# Audio parameters
+sample_rate: 44100
+n_fft: 2048
+hop_length: 512
+win_length: 2048
+
+# Optimization
+num_steps: 5000
+lr: 0.01
+lr_decay: 0.995
+optimizer_type: adam
+
+# Loss
+loss_type: spectral  # l1, l2, spectral
+perceptual_weight: 0.1
+phase_weight: 0.0
+
+# Adaptive refinement
+adaptive_add: false
+add_gaussians_steps: [1000, 2000, 3000]
+
+# Quantization
+quantize: false
+bits_per_param: 8
+
+# Logging
+save_steps: 1000
+eval_steps: 500
+log_level: INFO

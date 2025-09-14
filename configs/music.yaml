@@ -1,0 +1,35 @@
+# Configuration optimized for music compression
+
+# Model - more Gaussians for complex harmonics
+num_gaussians: 1000
+init_method: peaks
+
+# Audio parameters - higher quality
+sample_rate: 48000
+n_fft: 4096
+hop_length: 512
+win_length: 4096
+
+# Optimization - longer training
+num_steps: 10000
+lr: 0.005
+lr_decay: 0.998
+optimizer_type: adam
+
+# Loss - emphasize perceptual quality
+loss_type: spectral
+perceptual_weight: 0.3
+phase_weight: 0.05
+
+# Adaptive refinement - enable for better quality
+adaptive_add: true
+add_gaussians_steps: [2000, 4000, 6000, 8000]
+
+# Quantization
+quantize: false
+bits_per_param: 12
+
+# Logging
+save_steps: 2000
+eval_steps: 1000
+log_level: INFO
