@@ -97,3 +97,11 @@ wandb/
 .cache/
 tmp/
 temp/
+
+# Git helper scripts (not for distribution)
+git_*.bat
+git_*.ps1
+git_*.sh
+GIT_*.md
+*_setup.md
+*_setup.bat
