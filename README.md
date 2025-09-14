@@ -6,11 +6,7 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-red)](https://pytorch.org/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-[English](#english) | [中文](#中文)
-
 </div>
-
-## English
 
 A novel audio compression method using 2D Gaussian representation in the time-frequency domain, inspired by [Image-GS](https://github.com/NYU-ICL/image-gs).
 
@@ -116,113 +112,28 @@ Audio-GS/
 └── logs/               # Training outputs (auto-created)
 ```
 
----
+### 🎯 Training Guide
 
-## 中文
+See [TRAINING_GUIDE.md](TRAINING_GUIDE.md) for detailed training instructions.
 
-基于[Image-GS](https://github.com/NYU-ICL/image-gs)思想的新型音频压缩方法，使用时频域2D高斯表示。
-
-### 🌟 核心特性
-
-- **🎯 内容自适应**: 根据频谱重要性自动分配高斯
-- **⚡ 超快解码**: 每采样点仅需~0.3K MACs，适合嵌入式设备
-- **📊 灵活质量**: 压缩率可调节（10x到100x）
-- **🔧 简单易用**: 简洁的命令行界面和预配置
-
-### 🚀 快速开始
-
-#### 一键安装和演示
-```bash
-# 自动安装、测试和演示训练
-python quick_start.py
-```
-
-#### 手动安装
-```bash
-# 创建环境
-conda create -n audio-gs python=3.10
-conda activate audio-gs
-
-# 安装依赖
-pip install -r requirements.txt
-
-# 运行测试
-python test_simple.py
-```
-
-### 📖 基础用法
-
-#### 简单训练
-```bash
-# 使用默认设置训练
-python main.py --input_path your_audio.wav --num_gaussians 500
-
-# 使用特定配置训练
-python main.py --input_path music.wav --config configs/music.yaml
-
-# 带量化的训练
-python main.py --input_path audio.wav --quantize --bits_per_param 8
-```
-
-#### Windows用户
-```bash
-# 交互式训练脚本
-run_training.bat
-```
-
-### 🎛️ 配置说明
-
-| 音频类型 | 高斯数量 | 配置文件 | 典型比特率 |
-|---------|---------|----------|-----------|
-| 语音 | 200-300 | `configs/speech.yaml` | 8-16 kbps |
-| 音乐 | 500-1000 | `configs/music.yaml` | 32-64 kbps |
-| 复杂音频 | 1000-2000 | 自定义 | 64-128 kbps |
-
-### 📊 性能基准
-
-| 方法 | 压缩率 | 信噪比 (dB) | 解码速度 |
-|------|--------|-------------|----------|
-| Audio-GS (语音) | 100x | 20-25 | 实时 |
-| Audio-GS (音乐) | 50x | 22-28 | 实时 |
-| MP3 128k | 11x | 35+ | 实时 |
-| Opus 32k | 44x | 30+ | 实时 |
-
-### 🔬 技术原理
-
-Audio-GS将音频信号表示为时频域中2D高斯的加权和：
-
-```
-S(t,f) = Σᵢ αᵢ · exp(-½[(t-μₜᵢ)²/σₜᵢ² + (f-μfᵢ)²/σfᵢ²])
-```
-
-每个高斯由以下参数定义：
-- **位置**: (μₜ, μf) - 时间和频率中心
-- **扩展**: (σₜ, σf) - 时间和频率宽度
-- **权重**: α - 贡献幅度
-- **相位**: φ - 相位信息
-
-### 🎯 训练指南
-
-详细的训练说明请查看 [TRAINING_GUIDE.md](TRAINING_GUIDE.md)
-
-#### 快速训练示例
+#### Quick Training Examples
 
 ```bash
-# 语音压缩（高压缩率）
+# Speech compression (high compression ratio)
 python main.py \
     --input_path speech.wav \
     --config configs/speech.yaml \
     --num_gaussians 300 \
     --quantize
 
-# 音乐压缩（高质量）
+# Music compression (high quality)
 python main.py \
     --input_path music.wav \
     --config configs/music.yaml \
     --num_gaussians 1000 \
     --num_steps 10000
 
-# 自适应高斯添加
+# Adaptive Gaussian addition
 python main.py \
     --input_path complex.wav \
     --num_gaussians 500 \
@@ -230,51 +141,51 @@ python main.py \
     --add_gaussians_steps 1000 2000 3000
 ```
 
-### 🔍 评估和可视化
+### 🔍 Evaluation and Visualization
 
 ```bash
-# 从检查点重建音频
+# Reconstruct audio from checkpoint
 python main.py \
     --eval \
     --ckpt_file logs/your_model/checkpoints/checkpoint_005000.pth \
     --log_dir eval_output
 
-# 查看训练日志
+# Monitor training progress
 tail -f logs/your_model/log_train.txt
 ```
 
-### 📈 性能优化建议
+### 📈 Performance Optimization Tips
 
-1. **提高质量**: 增加高斯数量和训练步数
-2. **减小文件**: 启用量化（`--quantize`）和减少高斯数
-3. **加快训练**: 使用GPU并调整学习率
-4. **特定优化**: 根据音频类型选择合适的配置文件
+1. **Improve quality**: Increase number of Gaussians and training steps
+2. **Reduce file size**: Enable quantization (`--quantize`) and reduce Gaussians
+3. **Speed up training**: Use GPU and adjust learning rate
+4. **Task-specific optimization**: Choose appropriate config file for audio type
 
-### 🤝 贡献
+### 🤝 Contributing
 
-欢迎贡献代码、报告问题或提出建议！
+Contributions are welcome! Please feel free to submit issues or pull requests.
 
-### 📄 许可证
+### 📄 License
 
-MIT License - 可自由用于学术和商业项目
+MIT License - See [LICENSE](LICENSE) file for details
 
-### 🙏 致谢
+### 🙏 Acknowledgments
 
-- [Image-GS](https://github.com/NYU-ICL/image-gs) - 提供了高斯表示的灵感
-- [PyTorch](https://pytorch.org/) - 深度学习框架
-- [librosa](https://librosa.org/) - 音频处理库
-- [torchaudio](https://pytorch.org/audio/) - PyTorch音频扩展
+- [Image-GS](https://github.com/NYU-ICL/image-gs) - Inspiration for Gaussian representation
+- [PyTorch](https://pytorch.org/) - Deep learning framework
+- [librosa](https://librosa.org/) - Audio processing library
+- [torchaudio](https://pytorch.org/audio/) - PyTorch audio extension
 
-### 📮 联系
+### 📮 Contact
 
-- GitHub Issues: [提交问题](https://github.com/yourusername/Audio-GS/issues)
-- 技术讨论: [Discussions](https://github.com/yourusername/Audio-GS/discussions)
+- GitHub Issues: [Report issues](https://github.com/yourusername/Audio-GS/issues)
+- Discussions: [Technical discussions](https://github.com/yourusername/Audio-GS/discussions)
 
 ---
 
 <div align="center">
 
-**如果这个项目对你有帮助，请给个⭐星标支持！**
+**If you find this project helpful, please give it a ⭐ star!**
 
 Made with ❤️ for audio compression research
 
