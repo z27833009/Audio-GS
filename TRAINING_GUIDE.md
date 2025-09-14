@@ -1,57 +1,57 @@
-# Audio-GS 训练指南
+# Audio-GS Training Guide
 
-## 快速开始
+## Quick Start
 
-### 1. 安装环境
+### 1. Environment Setup
 
 ```bash
-# 创建虚拟环境
+# Create virtual environment
 conda create -n audio-gs python=3.10
 conda activate audio-gs
 
-# 安装依赖
+# Install dependencies
 cd F:/Code/Audio-GS
 pip install -r requirements.txt
 ```
 
-### 2. 准备音频文件
+### 2. Prepare Audio Files
 
-将你的音频文件放在 `samples/` 目录下，支持格式：
-- WAV (推荐)
+Place your audio files in the `samples/` directory. Supported formats:
+- WAV (recommended)
 - MP3
 - FLAC
 - M4A
 
 ```bash
-# 创建样本目录
+# Create samples directory
 mkdir samples
-# 将音频文件复制到samples目录
+# Copy your audio files to samples directory
 ```
 
-### 3. 基础训练
+### 3. Basic Training
 
 ```bash
-# 最简单的训练命令
+# Simplest training command
 python main.py --input_path samples/your_audio.wav --num_gaussians 500
 
-# 指定输出目录
+# Specify output directory
 python main.py --input_path samples/piano.wav --num_gaussians 500 --log_dir outputs/piano_test
 ```
 
-## 详细训练参数
+## Training Parameters
 
-### 核心参数
+### Core Parameters
 
-| 参数 | 默认值 | 说明 |
-|-----|-------|------|
-| `--num_gaussians` | 500 | 高斯数量，越多质量越好但文件越大 |
-| `--num_steps` | 5000 | 训练步数，越多拟合越好 |
-| `--lr` | 0.01 | 学习率，影响收敛速度 |
-| `--init_method` | peaks | 初始化方法：peaks/random/uniform |
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `--num_gaussians` | 500 | Number of Gaussians (more = better quality, larger file) |
+| `--num_steps` | 5000 | Training iterations (more = better fit) |
+| `--lr` | 0.01 | Learning rate (affects convergence speed) |
+| `--init_method` | peaks | Initialization method: peaks/random/uniform |
 
-### 音频类型优化
+### Audio Type Optimization
 
-#### 音乐训练
+#### Music Training
 ```bash
 python main.py \
     --input_path samples/music.wav \
@@ -60,7 +60,7 @@ python main.py \
     --num_steps 10000
 ```
 
-#### 语音训练
+#### Speech Training
 ```bash
 python main.py \
     --input_path samples/speech.wav \
@@ -69,7 +69,7 @@ python main.py \
     --num_steps 3000
 ```
 
-#### 复杂音频（混音、交响乐）
+#### Complex Audio (Orchestral, Mixed)
 ```bash
 python main.py \
     --input_path samples/symphony.wav \
@@ -80,10 +80,10 @@ python main.py \
     --lr 0.005
 ```
 
-## 高级训练技巧
+## Advanced Training Techniques
 
-### 1. 自适应高斯添加
-在训练过程中动态添加高斯到高误差区域：
+### 1. Adaptive Gaussian Addition
+Dynamically add Gaussians to high-error regions during training:
 
 ```bash
 python main.py \
@@ -94,36 +94,36 @@ python main.py \
     --num_steps 5000
 ```
 
-### 2. 损失函数选择
+### 2. Loss Function Selection
 
-- **L2损失**：适合一般音频
+- **L2 Loss**: General purpose audio
   ```bash
   --loss_type l2
   ```
 
-- **频谱损失**：适合音乐，保留谐波结构
+- **Spectral Loss**: Music (preserves harmonic structure)
   ```bash
   --loss_type spectral --perceptual_weight 0.3
   ```
 
-- **L1损失**：适合语音，保留清晰度
+- **L1 Loss**: Speech (preserves clarity)
   ```bash
   --loss_type l1 --perceptual_weight 0.5
   ```
 
-### 3. 量化压缩
+### 3. Quantization for Compression
 
-训练后启用量化以减小文件大小：
+Enable quantization after training to reduce file size:
 
 ```bash
-# 8-bit量化（压缩率高）
+# 8-bit quantization (high compression)
 python main.py \
     --input_path samples/audio.wav \
     --num_gaussians 500 \
     --quantize \
     --bits_per_param 8
 
-# 16-bit量化（质量更好）
+# 16-bit quantization (better quality)
 python main.py \
     --input_path samples/audio.wav \
     --num_gaussians 500 \
@@ -131,16 +131,16 @@ python main.py \
     --bits_per_param 16
 ```
 
-## 批量训练脚本
+## Batch Training Script
 
-创建 `batch_train.py`：
+Create `batch_train.py`:
 
 ```python
 import os
 import subprocess
 from pathlib import Path
 
-# 配置
+# Configuration
 SAMPLE_DIR = "samples"
 OUTPUT_DIR = "outputs"
 CONFIG_MAP = {
@@ -150,7 +150,7 @@ CONFIG_MAP = {
 }
 
 def detect_audio_type(filename):
-    """根据文件名猜测音频类型"""
+    """Detect audio type from filename"""
     name_lower = filename.lower()
     if any(word in name_lower for word in ["speech", "voice", "talk"]):
         return "speech"
@@ -159,7 +159,7 @@ def detect_audio_type(filename):
     return "default"
 
 def train_audio(audio_path, audio_type="default"):
-    """训练单个音频文件"""
+    """Train single audio file"""
     audio_name = Path(audio_path).stem
     output_dir = os.path.join(OUTPUT_DIR, audio_name)
 
@@ -174,17 +174,17 @@ def train_audio(audio_path, audio_type="default"):
     subprocess.run(cmd)
 
 def main():
-    # 创建输出目录
+    # Create output directory
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    # 获取所有音频文件
+    # Get all audio files
     audio_files = []
     for ext in ["*.wav", "*.mp3", "*.flac"]:
         audio_files.extend(Path(SAMPLE_DIR).glob(ext))
 
     print(f"Found {len(audio_files)} audio files")
 
-    # 训练每个文件
+    # Train each file
     for audio_file in audio_files:
         audio_type = detect_audio_type(audio_file.name)
         train_audio(str(audio_file), audio_type)
@@ -195,35 +195,35 @@ if __name__ == "__main__":
     main()
 ```
 
-## 监控训练进度
+## Monitoring Training Progress
 
-### 查看日志
-训练日志保存在 `log_dir` 目录下：
+### View Logs
+Training logs are saved in the `log_dir` directory:
 ```
 logs/your_audio_g500_peaks/
-├── log_train.txt          # 训练日志
-├── cfg_train.yaml         # 训练配置
-├── train/                 # 训练输出
-│   ├── reconstructed.wav  # 重建音频
-│   └── gaussians_visualization.png  # 可视化
-└── checkpoints/           # 模型检查点
+├── log_train.txt          # Training log
+├── cfg_train.yaml         # Training configuration
+├── train/                 # Training outputs
+│   ├── reconstructed.wav  # Reconstructed audio
+│   └── gaussians_visualization.png  # Visualization
+└── checkpoints/           # Model checkpoints
     ├── checkpoint_001000.pth
     ├── checkpoint_002000.pth
     └── ...
 ```
 
-### 实时监控
+### Real-time Monitoring
 ```bash
-# 查看训练日志
+# View training log
 tail -f logs/your_audio_g500_peaks/log_train.txt
 
-# 使用tensorboard（如果添加了tensorboard支持）
+# Use tensorboard (if tensorboard support is added)
 tensorboard --logdir logs/
 ```
 
-## 评估模型
+## Model Evaluation
 
-### 从检查点重建音频
+### Reconstruct Audio from Checkpoint
 ```bash
 python main.py \
     --eval \
@@ -231,9 +231,8 @@ python main.py \
     --log_dir eval_output
 ```
 
-### 计算压缩率
-```python
-# 查看压缩统计
+### Compression Statistics
+```
 Original size: 1720.32 KB
 Compressed size: 23.44 KB
 Compression ratio: 73.38x
@@ -241,41 +240,41 @@ Bitrate: 12.3 kbps
 SNR: 24.56 dB
 ```
 
-## 常见问题
+## Common Issues
 
-### 1. 如何选择高斯数量？
-- **语音**: 200-500个高斯
-- **简单音乐**: 500-1000个高斯
-- **复杂音乐**: 1000-3000个高斯
-- **高保真**: 3000+个高斯
+### 1. How to Choose Number of Gaussians?
+- **Speech**: 200-500 Gaussians
+- **Simple Music**: 500-1000 Gaussians
+- **Complex Music**: 1000-3000 Gaussians
+- **High Fidelity**: 3000+ Gaussians
 
-### 2. 训练不收敛？
-- 降低学习率：`--lr 0.001`
-- 增加训练步数：`--num_steps 10000`
-- 尝试不同初始化：`--init_method uniform`
+### 2. Training Not Converging?
+- Reduce learning rate: `--lr 0.001`
+- Increase training steps: `--num_steps 10000`
+- Try different initialization: `--init_method uniform`
 
-### 3. 重建质量差？
-- 增加高斯数量
-- 启用自适应添加：`--adaptive_add`
-- 调整感知权重：`--perceptual_weight 0.5`
+### 3. Poor Reconstruction Quality?
+- Increase number of Gaussians
+- Enable adaptive addition: `--adaptive_add`
+- Adjust perceptual weight: `--perceptual_weight 0.5`
 
-### 4. 文件太大？
-- 启用量化：`--quantize --bits_per_param 6`
-- 减少高斯数量
-- 使用更激进的量化
+### 4. File Too Large?
+- Enable quantization: `--quantize --bits_per_param 6`
+- Reduce number of Gaussians
+- Use more aggressive quantization
 
-## 性能基准
+## Performance Benchmarks
 
-| 音频类型 | 高斯数 | 压缩率 | SNR | 比特率 |
-|---------|--------|--------|-----|--------|
-| 语音 | 300 | 100x | 20dB | 8kbps |
-| 钢琴 | 500 | 60x | 25dB | 16kbps |
-| 流行音乐 | 1000 | 30x | 22dB | 32kbps |
-| 交响乐 | 2000 | 15x | 20dB | 64kbps |
+| Audio Type | Gaussians | Compression | SNR | Bitrate |
+|------------|-----------|-------------|-----|---------|
+| Speech | 300 | 100x | 20dB | 8kbps |
+| Piano | 500 | 60x | 25dB | 16kbps |
+| Pop Music | 1000 | 30x | 22dB | 32kbps |
+| Orchestra | 2000 | 15x | 20dB | 64kbps |
 
-## 下一步
+## Next Steps
 
-1. **优化质量**: 调整损失函数权重和高斯数量
-2. **减小文件**: 启用量化和熵编码
-3. **批量处理**: 使用批处理脚本处理多个文件
-4. **实时编码**: 开发流式编码器
+1. **Optimize Quality**: Adjust loss weights and Gaussian count
+2. **Reduce File Size**: Enable quantization and entropy coding
+3. **Batch Processing**: Use batch script for multiple files
+4. **Real-time Encoding**: Develop streaming encoder
