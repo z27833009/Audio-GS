@@ -178,8 +178,8 @@ MIT License - See [LICENSE](LICENSE) file for details
 
 ### 📮 Contact
 
-- GitHub Issues: [Report issues](https://github.com/yourusername/Audio-GS/issues)
-- Discussions: [Technical discussions](https://github.com/yourusername/Audio-GS/discussions)
+- GitHub Issues: [Report issues](https://github.com/z27833009/Audio-GS/issues)
+- Discussions: [Technical discussions](https://github.com/z27833009/Audio-GS/discussions)
 
 ---
 
