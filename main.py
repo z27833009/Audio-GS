@@ -121,6 +121,7 @@ def main():
     
     if args.eval:
         # Evaluation mode - decode and save audio
+        model.eval()
         print("\nDecoding audio from Gaussians...")
         with torch.no_grad():
             rendered_magnitude, rendered_complex = model.forward()

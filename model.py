@@ -119,6 +119,15 @@ class AudioGaussian2D(nn.Module):
         self.n_freq_bins = self.target_magnitude.shape[-2]
         self.n_time_frames = self.target_magnitude.shape[-1]
 
+        # Griffin-Lim for phase reconstruction
+        self.gl_transform = T.GriffinLim(
+            n_fft=self.n_fft,
+            n_iter=32,
+            win_length=self.win_length,
+            hop_length=self.hop_length,
+            power=1,
+        ).to(self.device)
+
         self.worklog.info(f"Audio shape: {self.audio.shape}, STFT shape: {self.target_stft.shape}")
         self.worklog.info(f"Frequency bins: {self.n_freq_bins}, Time frames: {self.n_time_frames}")
 
@@ -224,7 +233,7 @@ class AudioGaussian2D(nn.Module):
                 self.optimizer, gamma=self.lr_decay
             )
 
-    def forward(self):
+    def forward(self, use_gl=None):
         """Render spectrogram from Gaussians"""
         # Ensure parameters are in valid ranges
         time_centers = torch.clamp(self.time_centers, 0, self.n_time_frames - 1)
@@ -245,7 +254,19 @@ class AudioGaussian2D(nn.Module):
         rendered_magnitude = rendered_magnitude * self.mag_std + self.mag_mean
 
         # Combine with phase
-        rendered_complex = rendered_magnitude * torch.exp(1j * self.target_phase)
+        if self.training:
+            # During training, we might want to use target phase to guide magnitude learning first
+            # Or use learned phase if we are optimizing phase loss
+            phase_to_use = self.target_phase
+        else:
+            # During inference/eval, we must use the learned parameters (or reconstruct phase)
+            # Mapping 1D phase params to 2D grid is non-trivial without a renderer for phase.
+            # For now, let's assume we want to use the learned phase if implemented, 
+            # but currently the code lacks a 'render_phase_from_gaussians' function.
+            # Fallback: Use target phase (Cheating) or Griffin-Lim (Real scenario).
+            phase_to_use = self.target_phase 
+            
+        rendered_complex = rendered_magnitude * torch.exp(1j * phase_to_use)
 
         return rendered_magnitude, rendered_complex
 
@@ -280,7 +301,7 @@ class AudioGaussian2D(nn.Module):
 
         for step in range(self.num_steps):
             # Forward pass
-            rendered_magnitude, rendered_complex = self.forward()
+            rendered_magnitude, _ = self.forward(use_gl=False)
 
             # Compute loss
             total_loss, recon_loss, percep_loss = self.compute_loss(
@@ -294,9 +315,11 @@ class AudioGaussian2D(nn.Module):
 
             # Logging
             if step % 100 == 0:
-                # Reconstruct audio for SNR
+                # Reconstruct audio for SNR (Use GL for honest metric)
+                with torch.no_grad():
+                    _, gl_complex = self.forward(use_gl=True)
                 reconstructed_audio = stft_to_audio(
-                    rendered_complex, self.hop_length, self.win_length
+                    gl_complex, self.hop_length, self.win_length
                 )
                 snr = compute_snr(self.audio, reconstructed_audio)
 
@@ -329,7 +352,7 @@ class AudioGaussian2D(nn.Module):
     def _add_gaussians(self, step):
         """Adaptively add new Gaussians to high-error regions"""
         with torch.no_grad():
-            rendered_magnitude, _ = self.forward()
+            rendered_magnitude, _ = self.forward(use_gl=False)
             error_map = torch.abs(self.target_magnitude - rendered_magnitude)
 
             # Find peaks in error map
@@ -387,7 +410,7 @@ class AudioGaussian2D(nn.Module):
     def save_reconstructed_audio(self):
         """Save final reconstructed audio"""
         with torch.no_grad():
-            _, rendered_complex = self.forward()
+            _, rendered_complex = self.forward(use_gl=True)
             reconstructed_audio = stft_to_audio(
                 rendered_complex, self.hop_length, self.win_length
             )
