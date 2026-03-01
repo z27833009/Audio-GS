@@ -17,7 +17,16 @@ A novel audio compression method using 2D Gaussian representation in the time-fr
 - **📊 Flexible Quality**: Adjustable compression ratio from 10x to 100x
 - **🔧 Easy to Use**: Simple CLI interface with pre-configured settings
 
-### 🚀 Quick Start
+### � Performance Benchmarks
+
+| Method | Compression Ratio | SNR (dB) | Decode Speed |
+|--------|-------------------|----------|--------------|
+| Audio-GS (Speech) | 100x | 20-25 | Real-time |
+| Audio-GS (Music) | 50x | 22-28 | Real-time |
+| MP3 128k | 11x | 35+ | Real-time |
+| Opus 32k | 44x | 30+ | Real-time |
+
+### �🚀 Quick Start
 
 #### One-Click Setup and Demo
 ```bash
@@ -65,15 +74,6 @@ run_training.bat
 | Speech | 200-300 | `configs/speech.yaml` | 8-16 kbps |
 | Music | 500-1000 | `configs/music.yaml` | 32-64 kbps |
 | Complex | 1000-2000 | Custom | 64-128 kbps |
-
-### 📊 Performance Benchmarks
-
-| Method | Compression Ratio | SNR (dB) | Decode Speed |
-|--------|-------------------|----------|--------------|
-| Audio-GS (Speech) | 100x | 20-25 | Real-time |
-| Audio-GS (Music) | 50x | 22-28 | Real-time |
-| MP3 128k | 11x | 35+ | Real-time |
-| Opus 32k | 44x | 30+ | Real-time |
 
 ### 🔬 Technical Details
 
